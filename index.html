@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign the NDA | Vinova</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<style>
+  :root {
+    --desk: #dde3ea;
+    --paper: #ffffff;
+    --ink: #17212b;
+    --muted: #5a6776;
+    --rule: #c4cdd8;
+    --tint: #f4f7fa;
+    --seal: #1d4f91;
+    --seal-dark: #163c70;
+    --ok: #1e7b4f;
+    --bad: #b3261e;
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--desk);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.65;
+  }
+  .bar {
+    display: flex; justify-content: space-between; align-items: baseline;
+    max-width: 800px; margin: 0 auto; padding: 18px 20px 10px;
+    font-family: var(--sans); font-size: 15px; color: var(--muted);
+  }
+  .bar .mark { font-weight: 600; font-size: 18px; color: var(--ink); letter-spacing: 0.01em; }
+  main { max-width: 800px; margin: 0 auto; padding: 0 12px 64px; }
+  .sheet {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: clamp(24px, 6vw, 64px);
+    box-shadow: 0 1px 0 var(--rule);
+  }
+  h1 { font-size: clamp(30px, 5.4vw, 42px); line-height: 1.12; margin: 0 0 12px; font-weight: 600; letter-spacing: -0.01em; }
+  .lede { font-family: var(--sans); font-size: 16px; color: var(--muted); margin: 0 0 36px; max-width: 56ch; }
+  h2 { font-size: 21px; line-height: 1.3; margin: 40px 0 10px; font-weight: 600; }
+  p { margin: 0 0 14px; max-width: 70ch; }
+  ol, ul { margin: 0 0 14px; padding-left: 1.4em; max-width: 70ch; }
+  li { margin-bottom: 8px; padding-left: 4px; }
+  strong { font-weight: 600; }
+  table.notices { border-collapse: collapse; width: 100%; font-size: 16px; margin: 8px 0 0; }
+  table.notices th, table.notices td { border: 1px solid var(--rule); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.notices th { background: var(--tint); font-family: var(--sans); font-weight: 500; font-size: 15px; }
+
+  /* Signing block */
+  .signing { margin-top: 12px; border-top: 2px solid var(--ink); padding-top: 8px; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 20px; }
+  @media (max-width: 700px) { .parties { grid-template-columns: 1fr; gap: 36px; } }
+  .party h3 { font-family: var(--sans); font-size: 15px; font-weight: 600; margin: 0 0 14px; }
+  .field { margin: 0 0 18px; font-family: var(--sans); }
+  .field label, .field .label { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="date"] {
+    width: 100%; font: inherit; font-size: 17px; color: var(--ink);
+    padding: 10px 12px; border: 1px solid var(--rule); border-radius: 3px; background: #fff;
+  }
+  input:focus-visible, button:focus-visible, canvas:focus-visible, .check input:focus-visible {
+    outline: 3px solid var(--seal); outline-offset: 2px;
+  }
+  .sigwrap { position: relative; border-bottom: 1.5px solid var(--ink); background: var(--tint); }
+  .sigwrap::before {
+    content: "\00d7"; position: absolute; left: 10px; bottom: 6px;
+    font-family: var(--sans); font-size: 22px; color: var(--muted); pointer-events: none;
+  }
+  canvas#pad { display: block; width: 100%; height: 150px; touch-action: none; cursor: crosshair; }
+  .sig-tools { display: flex; gap: 16px; margin-top: 8px; font-family: var(--sans); font-size: 14px; }
+  .linkbtn { background: none; border: 0; padding: 0; font: inherit; color: var(--seal); text-decoration: underline; cursor: pointer; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-family: var(--sans); font-size: 15px; line-height: 1.5; margin: 6px 0 14px; }
+  .check input { margin-top: 3px; width: 18px; height: 18px; flex: none; }
+  .fine { font-family: var(--sans); font-size: 13px; color: var(--muted); margin: 0 0 18px; max-width: 60ch; }
+  button.primary {
+    font-family: var(--sans); font-size: 17px; font-weight: 600; color: #fff; background: var(--seal);
+    border: 0; border-radius: 3px; padding: 13px 24px; cursor: pointer; width: 100%;
+  }
+  button.primary:hover:not(:disabled) { background: var(--seal-dark); }
+  button.primary:disabled { background: #9db2cf; cursor: not-allowed; }
+  .error { font-family: var(--sans); font-size: 15px; color: var(--bad); margin: 12px 0 0; min-height: 1.3em; }
+  .devsig { min-height: 150px; display: flex; align-items: flex-end; border-bottom: 1.5px solid var(--ink); padding-bottom: 6px; }
+  .devsig img { max-height: 120px; max-width: 100%; }
+  .devsig .typed { font-style: italic; font-size: 38px; line-height: 1.1; color: var(--seal); }
+  .meta { font-family: var(--sans); font-size: 15px; margin: 10px 0 0; color: var(--ink); }
+  .meta span { color: var(--muted); }
+
+  /* Confirmation */
+  .done { background: var(--paper); border: 1px solid var(--rule); border-radius: 3px; padding: clamp(24px, 6vw, 56px); }
+  .done h1 { margin-bottom: 14px; }
+  .done p { font-family: var(--sans); font-size: 17px; }
+  .done .ref { font-family: var(--sans); font-size: 14px; color: var(--muted); }
+  .done a.download {
+    display: inline-block; font-family: var(--sans); font-weight: 600; font-size: 17px; color: #fff; background: var(--ok);
+    border-radius: 3px; padding: 12px 22px; text-decoration: none; margin: 8px 0 18px;
+  }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="bar"><span class="mark">Vinova</span><span>Mutual NDA</span></header>
+<main>
+  <noscript><p class="sheet">This page needs JavaScript to display and sign the agreement.</p></noscript>
+
+  <article class="sheet" id="sheet">
+    <h1>Mutual Non-Disclosure Agreement</h1>
+    <p class="lede">Read the agreement, then sign at the end. Signing takes about two minutes, and you can download a copy afterwards.</p>
+    <div id="agreement"></div>
+
+    <section class="signing" id="signing" aria-labelledby="sign-h">
+      <h2 id="sign-h" style="margin-top:24px">Signatures</h2>
+      <p>The Parties have signed this Agreement as of the Effective Date.</p>
+
+      <div class="parties">
+        <div class="party">
+          <h3>Developer</h3>
+          <div class="devsig" id="devsig"></div>
+          <p class="meta" id="devmeta"></p>
+        </div>
+
+        <form class="party" id="form" novalidate>
+          <h3>Client</h3>
+          <div class="field">
+            <label for="fullname">Full name</label>
+            <input id="fullname" name="fullname" type="text" autocomplete="name" required maxlength="120">
+          </div>
+          <div class="field">
+            <label for="signdate">Date signed</label>
+            <input id="signdate" name="signdate" type="date" required>
+          </div>
+          <div class="field">
+            <span class="label" id="sig-label">Signature</span>
+            <div class="sigwrap"><canvas id="pad" role="img" aria-labelledby="sig-label" tabindex="0"></canvas></div>
+            <div class="sig-tools">
+              <button type="button" class="linkbtn" id="clear">Clear</button>
+              <button type="button" class="linkbtn" id="typed">Use my typed name as my signature</button>
+            </div>
+          </div>
+          <label class="check">
+            <input type="checkbox" id="agree">
+            <span>I have read this Agreement and agree to be bound by it. If I am signing for a company, I confirm that I am authorised to sign for it.</span>
+          </label>
+          <p class="fine">To keep a record of this signing, we store your name, signature, date, IP address and browser details, together with the signed copy.</p>
+          <button type="submit" class="primary" id="submit" disabled>Sign agreement</button>
+          <p class="error" id="error" role="alert" aria-live="assertive"></p>
+        </form>
+      </div>
+    </section>
+  </article>
+
+  <section class="done" id="done" hidden>
+    <h1>Agreement signed</h1>
+    <p>Thank you, <strong id="done-name"></strong>. Vinova has received your signed agreement.</p>
+    <p>Download your copy now. We don't email it to you, so keep it for your records.</p>
+    <a class="download" id="download" href="#" download>Download signed copy (PDF)</a>
+    <p class="ref">Reference: <span id="done-ref"></span></p>
+  </section>
+</main>
+
+<script>
+/* ------------------------------------------------------------------
+   CONFIGURE THESE BEFORE PUBLISHING
+------------------------------------------------------------------ */
+const CONFIG = {
+  // Full URL of your deployed Cloudflare Worker, ending in /sign
+  apiUrl: "https://REPLACE-WITH-YOUR-WORKER-URL/sign",
+  // Vinova's own signatory. Leave signatureImage empty to show the typed name instead.
+  developer: {
+    name: "",              // e.g. the director's full name
+    title: "",             // e.g. "Director"
+    signatureImage: ""     // e.g. "signature.png" (a transparent PNG placed next to index.html)
+  }
+};
+
+/* ------------------------------------------------------------------
+   AGREEMENT TEXT (single source for the page, the PDF and the hash)
+   Use **bold** for lead-ins. Types: h, p, ol, ul, table.
+------------------------------------------------------------------ */
+const AGREEMENT = {
+  version: "2026-10-12-v1",
+  title: "Mutual Non-Disclosure Agreement",
+  blocks: [
+    { t: "h", x: "Parties and Effective Date" },
+    { t: "p", x: 'This Mutual Non-Disclosure Agreement (the "Agreement") is entered into as of the date on which the last Party signs it (the "Effective Date") between:' },
+    { t: "p", x: '**Vinova Pte Ltd** (UEN 201009399G), a private limited company incorporated under the laws of Singapore, with its registered address at 745 Lorong 5 Toa Payoh, #03-03, The Actuary, Singapore 319455 ("Developer"); and' },
+    { t: "p", x: 'The person or entity whose name is entered as "Client" in the signature block of this Agreement ("Client").' },
+    { t: "p", x: 'Developer and Client are each a "Party" and together the "Parties." A Party that discloses Confidential Information is the "Disclosing Party," and a Party that receives it is the "Receiving Party."' },
+
+    { t: "h", x: "1. Purpose" },
+    { t: "p", x: 'The Parties wish to explore or carry out a business relationship involving the design, development, testing, optimization, maintenance or security review of mobile applications and related backend services for Client (the "Purpose"). To do so, each Party may disclose confidential information to the other. This Agreement governs how that information is protected, and each Party may use it only for the Purpose.' },
+
+    { t: "h", x: "2. Confidential Information" },
+    { t: "p", x: '"Confidential Information" means all non-public information, in any form, that a Disclosing Party or its affiliates disclose to the Receiving Party in connection with the Purpose, whether before or after the Effective Date, that is marked confidential or that a reasonable person would understand to be confidential given its nature and the circumstances of disclosure. It includes:' },
+    { t: "ul", items: [
+      "**Technical information:** source code, object code, repositories, build pipelines, architecture and system designs, APIs, SDKs, data models, algorithms, wireframes, UI/UX designs, prototypes, unreleased features, product roadmaps, and performance, crash or analytics data.",
+      "**Security information:** API keys, tokens, certificates, encryption keys, credentials, penetration test results, vulnerability reports, fraud-detection rules, risk models, and information about security controls or incidents.",
+      "**Financial and customer information:** customer records, account and transaction data, payment card data, know-your-customer (KYC) and anti-money-laundering (AML) data, credit or scoring models, pricing, fee structures, and non-public financial results.",
+      "**Business information:** business plans, strategies, partner and vendor terms, regulatory correspondence, licensing and compliance matters, marketing plans, investor information, and the terms of any proposed or actual agreement.",
+      "**Derived materials:** notes, analyses, summaries and other materials prepared by the Receiving Party that contain or reflect any of the above."
+    ] },
+    { t: "p", x: "The existence and terms of the Parties' discussions are also Confidential Information." },
+
+    { t: "h", x: "3. Exclusions" },
+    { t: "p", x: "Confidential Information does not include information that the Receiving Party can show by written records:" },
+    { t: "ol", items: [
+      "is or becomes publicly available through no breach of this Agreement by the Receiving Party;",
+      "was lawfully known to the Receiving Party, without confidentiality obligations, before receiving it from the Disclosing Party;",
+      "is lawfully received from a third party that owes no duty of confidentiality to the Disclosing Party; or",
+      "is independently developed by the Receiving Party without use of or reference to the Disclosing Party's Confidential Information."
+    ] },
+    { t: "p", x: "These exclusions never apply to personal data, payment card data or customer financial data. Those categories are protected under Section 6 regardless of how the Receiving Party came to hold them." },
+
+    { t: "h", x: "4. Obligations of the Receiving Party" },
+    { t: "p", x: "The Receiving Party shall:" },
+    { t: "ol", items: [
+      "use the Disclosing Party's Confidential Information only for the Purpose;",
+      "keep it confidential using at least the same degree of care it uses for its own most sensitive information, and never less than reasonable care;",
+      "not disclose it to anyone except as permitted by Section 7 or Section 8;",
+      "not copy or reproduce it except as needed for the Purpose, and keep all copies marked as confidential;",
+      "not reverse engineer, decompile or disassemble any software, prototype or other material that embodies Confidential Information; and",
+      "promptly notify the Disclosing Party in writing of any unauthorized use or disclosure it becomes aware of."
+    ] },
+
+    { t: "h", x: "5. Security and Data Handling" },
+    { t: "p", x: "Because the work involves software that handles money and sensitive customer data, the Receiving Party shall maintain administrative, technical and physical safeguards that are appropriate to the sensitivity of the information and consistent with recognized industry standards (such as ISO/IEC 27001, SOC 2 or the OWASP Mobile Application Security guidance). At a minimum, the Receiving Party shall:" },
+    { t: "ul", items: [
+      "**Limit access** to personnel who need it for the Purpose, using unique accounts, least-privilege permissions and multi-factor authentication.",
+      "**Encrypt** Confidential Information in transit and at rest using current, industry-accepted methods.",
+      "**Protect credentials and secrets** by storing API keys, tokens and certificates only in approved secrets-management tools, never in source code, tickets, chat messages or personal devices.",
+      "**Use non-production data.** Develop and test with synthetic or properly masked data. Production customer or financial data may be accessed only with the Disclosing Party's prior written approval, for a stated task, and in an environment the Disclosing Party has approved.",
+      "**Control source code** by keeping it in access-controlled repositories, and by not uploading it or other Confidential Information to public repositories, public code-sharing sites, or third-party tools (including AI coding assistants and analytics services) that are not approved in writing by the Disclosing Party.",
+      "**Secure devices and locations** by using company-managed or approved devices with disk encryption, and by not storing Confidential Information on unmanaged personal devices or removable media.",
+      "**Keep logs** of access to Confidential Information and retain them for 12 months."
+    ] },
+
+    { t: "h", x: "6. Personal Data, Financial Data and Regulatory Compliance" },
+    { t: "p", x: "To the extent Confidential Information includes personal data, payment card data or other regulated financial data, the Receiving Party shall:" },
+    { t: "ol", items: [
+      "comply with all data protection, privacy, financial services and cybersecurity laws and regulations that apply to it or to the Disclosing Party in respect of that data (for example Singapore's Personal Data Protection Act 2012, the requirements and guidelines of the Monetary Authority of Singapore (MAS), GDPR, or local equivalents), and with the Payment Card Industry Data Security Standard (PCI DSS) where cardholder data is involved;",
+      "process such data only on the Disclosing Party's documented instructions and only to the extent needed for the Purpose;",
+      "not transfer such data across borders, or to any location not approved by the Disclosing Party, without prior written consent and any safeguards the law requires;",
+      "cooperate reasonably with the Disclosing Party's regulators, auditors and security assessments, including answering reasonable due-diligence questionnaires; and",
+      "if the Parties' relationship requires a data processing agreement or similar addendum, sign it. If that agreement conflicts with this Agreement on personal data, it prevails."
+    ] },
+    { t: "p", x: "Nothing in this Agreement requires either Party to act in breach of applicable law or a regulator's order." },
+
+    { t: "h", x: "7. Permitted Disclosures to Personnel and Subcontractors" },
+    { t: "p", x: 'The Receiving Party may share Confidential Information only with its directors, employees, affiliates, professional advisers and approved subcontractors ("Representatives") who:' },
+    { t: "ol", items: [
+      "have a genuine need to know it for the Purpose;",
+      "have been told it is confidential; and",
+      "are bound by written confidentiality obligations at least as protective as this Agreement."
+    ] },
+    { t: "p", x: "The Receiving Party shall obtain the Disclosing Party's prior written consent before engaging any subcontractor, freelancer, offshore team or cloud or software vendor that will have access to the Disclosing Party's source code, credentials or customer data. The Receiving Party remains fully responsible for any act or omission of its Representatives that would breach this Agreement if done by the Receiving Party itself." },
+
+    { t: "h", x: "8. Compelled Disclosure" },
+    { t: "p", x: "If the Receiving Party is required by law, regulation, court order or a regulator to disclose Confidential Information, it shall, where legally permitted:" },
+    { t: "ol", items: [
+      "notify the Disclosing Party promptly in writing so that it can seek a protective order or other remedy;",
+      "cooperate reasonably with that effort; and",
+      "disclose only the portion that it is legally required to disclose."
+    ] },
+    { t: "p", x: "A disclosure made in a routine regulatory examination of the Disclosing Party, at the Disclosing Party's request, is not a breach of this Agreement. Nothing here prevents any person from reporting a possible violation of law to a government authority." },
+
+    { t: "h", x: "9. Ownership, No License, and Feedback" },
+    { t: "p", x: "All Confidential Information remains the property of the Disclosing Party. This Agreement grants no license or other right in any patent, copyright, trade secret, trademark or other intellectual property, other than the limited right to use Confidential Information for the Purpose." },
+    { t: "p", x: "This Agreement does not transfer ownership of any work product created under a separate services agreement; that agreement governs. It also does not stop either Party from building software or services for others, provided it does not use or disclose the other Party's Confidential Information to do so." },
+    { t: "p", x: "Suggestions or feedback that the Receiving Party gives about the Disclosing Party's products are not Confidential Information of the Receiving Party and may be used freely by the Disclosing Party." },
+
+    { t: "h", x: "10. Security Incidents and Breach Notification" },
+    { t: "p", x: 'If the Receiving Party or any of its Representatives discovers or reasonably suspects any unauthorized access to, or loss, theft, use or disclosure of, the Disclosing Party\'s Confidential Information (a "Security Incident"), the Receiving Party shall:' },
+    { t: "ol", items: [
+      "notify the Disclosing Party in writing without undue delay, and in any event within 48 hours of discovery, using the contact in Section 14;",
+      "take immediate steps to contain the incident and prevent recurrence, including revoking or rotating any exposed credentials, keys or tokens;",
+      "give the Disclosing Party the information it reasonably needs to meet its own legal and regulatory notification duties, including the nature of the incident, the data involved and the steps taken;",
+      "preserve relevant logs and evidence and cooperate fully with any investigation; and",
+      "not notify regulators, affected individuals or the public about the incident on the Disclosing Party's behalf unless the law requires it or the Disclosing Party agrees."
+    ] },
+    { t: "p", x: "The Receiving Party shall bear the reasonable costs of investigating and remediating a Security Incident to the extent it arose from the Receiving Party's or its Representatives' breach of this Agreement." },
+
+    { t: "h", x: "11. Term and Survival" },
+    { t: "p", x: "This Agreement applies to Confidential Information disclosed during the period beginning on the Effective Date and ending two (2) years later, unless either Party ends it earlier by 30 days' written notice. Ending the Agreement does not release either Party from its obligations for information already disclosed." },
+    { t: "p", x: "The Receiving Party's confidentiality obligations continue for five (5) years after the Agreement ends. However, obligations for source code, credentials and encryption keys, trade secrets, and personal or financial data continue for as long as that information remains confidential or is protected by law." },
+
+    { t: "h", x: "12. Return and Destruction of Materials" },
+    { t: "p", x: "Within 15 days after the Disclosing Party's written request, or when the Purpose ends, the Receiving Party shall:" },
+    { t: "ol", items: [
+      "return or securely destroy all Confidential Information and all copies, including source code checkouts, local databases, build artifacts, test devices, cloud storage, backups where practicable, and derived materials;",
+      "permanently remove the Disclosing Party's credentials, keys and access tokens from all systems, and confirm that all access it was given has been revoked; and",
+      "provide a written certificate, signed by an authorized officer, confirming it has done so."
+    ] },
+    { t: "p", x: "The Receiving Party may keep copies that the law requires it to retain, or that exist in routine backups that cannot practicably be deleted. Those copies stay subject to this Agreement for as long as they are kept and may not be accessed for any other purpose." },
+
+    { t: "h", x: "13. Remedies and Indemnity" },
+    { t: "p", x: "Each Party acknowledges that unauthorized use or disclosure of Confidential Information may cause harm that money alone cannot repair. The Disclosing Party may therefore seek injunctive relief or specific performance in addition to any other remedy, without needing to prove actual damages and, where the law allows, without posting a bond." },
+    { t: "p", x: "The Receiving Party shall indemnify the Disclosing Party against losses, damages, regulatory fines and penalties (to the extent the law allows them to be passed on), and reasonable legal costs arising from a breach of this Agreement by the Receiving Party or its Representatives." },
+    { t: "p", x: "The prevailing Party in any action to enforce this Agreement may recover its reasonable legal fees and costs." },
+
+    { t: "h", x: "14. General Provisions" },
+    { t: "ul", items: [
+      "**Governing law:** This Agreement is governed by the laws of Singapore, without regard to its conflict-of-laws rules.",
+      "**Disputes:** The Parties shall first try to resolve a dispute through good-faith discussions between senior managers for 30 days. Failing that, disputes shall be resolved by the courts of Singapore, to whose jurisdiction the Parties submit. Either Party may seek urgent injunctive relief from any competent court at any time.",
+      "**No obligation to proceed:** Neither Party must disclose any information or enter into any further agreement. Each Party may decline to disclose any information at its discretion.",
+      '**No warranty:** Confidential Information is provided "as is." Any warranties will be set out only in a separate written agreement.',
+      "**Assignment:** Neither Party may assign this Agreement without the other's written consent, except to a successor in a merger or sale of substantially all of its business that agrees in writing to be bound.",
+      "**Entire agreement:** This Agreement is the entire agreement on its subject matter and replaces earlier understandings on it. If the Parties sign a services agreement with confidentiality terms, the stricter protection applies unless that agreement expressly says otherwise.",
+      "**Amendment and waiver:** Changes must be in writing and signed by both Parties. A failure to enforce a right is not a waiver of it.",
+      "**Severability:** If any provision is held unenforceable, it will be enforced to the maximum extent permitted and the remaining provisions stay in effect.",
+      "**Counterparts:** This Agreement may be signed in counterparts and by electronic signature, each of which is an original.",
+      "**Notices:** Notices must be in writing and sent to the contact details below (or any updated details given by notice). Security Incident notices under Section 10 must also be sent by email."
+    ] },
+    { t: "table",
+      head: ["Party", "Address and contact for notices"],
+      rows: [
+        ["Developer", "745 Lorong 5 Toa Payoh, #03-03, The Actuary, Singapore 319455, Attention: The Directors, and by email to the address the Developer designates in writing"],
+        ["Client", "The contact details the Client gives the Developer in writing"]
+      ] }
+  ]
+};
+
+/* ------------------------------------------------------------------
+   Helpers
+------------------------------------------------------------------ */
+const $ = (s) => document.querySelector(s);
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+const strip = (s) => s.replace(/\*\*(.+?)\*\*/g, "$1");
+
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function todayLocal() {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+
+/* ------------------------------------------------------------------
+   Render the agreement
+------------------------------------------------------------------ */
+(function render() {
+  const out = [];
+  for (const b of AGREEMENT.blocks) {
+    if (b.t === "h") out.push("<h2>" + inline(b.x) + "</h2>");
+    else if (b.t === "p") out.push("<p>" + inline(b.x) + "</p>");
+    else if (b.t === "ol") out.push("<ol>" + b.items.map((i) => "<li>" + inline(i) + "</li>").join("") + "</ol>");
+    else if (b.t === "ul") out.push("<ul>" + b.items.map((i) => "<li>" + inline(i) + "</li>").join("") + "</ul>");
+    else if (b.t === "table") {
+      out.push('<table class="notices"><thead><tr>' + b.head.map((h) => "<th>" + inline(h) + "</th>").join("") +
+        "</tr></thead><tbody>" + b.rows.map((r) => "<tr>" + r.map((c) => "<td>" + inline(c) + "</td>").join("") + "</tr>").join("") +
+        "</tbody></table>");
+    }
+  }
+  $("#agreement").innerHTML = out.join("");
+
+  // Developer side of the signature block
+  const dev = CONFIG.developer;
+  const devsig = $("#devsig");
+  if (dev.signatureImage) {
+    const img = document.createElement("img");
+    img.src = dev.signatureImage;
+    img.alt = "Signature of " + (dev.name || "Vinova Pte Ltd signatory");
+    devsig.appendChild(img);
+  } else if (dev.name) {
+    const s = document.createElement("span");
+    s.className = "typed";
+    s.textContent = dev.name;
+    devsig.appendChild(s);
+  }
+  $("#devmeta").innerHTML =
+    "Signed for Vinova Pte Ltd (UEN 201009399G)" +
+    (dev.name ? "<br><span>Name:</span> " + esc(dev.name) : "") +
+    (dev.title ? "<br><span>Title:</span> " + esc(dev.title) : "");
+
+  $("#signdate").value = todayLocal();
+  $("#signdate").max = todayLocal();
+})();
+
+/* ------------------------------------------------------------------
+   Signature pad
+------------------------------------------------------------------ */
+const canvas = $("#pad");
+const ctx = canvas.getContext("2d");
+let drawing = false;
+let hasInk = false;
+
+function setupCanvas() {
+  const r = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(r.width * dpr);
+  canvas.height = Math.round(r.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#1d4f91";
+  ctx.fillStyle = "#1d4f91";
+}
+setupCanvas();
+window.addEventListener("resize", () => { if (!hasInk) setupCanvas(); });
+
+function pos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+canvas.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  canvas.setPointerCapture(e.pointerId);
+  drawing = true;
+  const p = pos(e);
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+  ctx.lineTo(p.x + 0.01, p.y + 0.01);
+  ctx.stroke();
+  hasInk = true;
+  validate();
+});
+canvas.addEventListener("pointermove", (e) => {
+  if (!drawing) return;
+  const p = pos(e);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+});
+const stop = () => { drawing = false; };
+canvas.addEventListener("pointerup", stop);
+canvas.addEventListener("pointercancel", stop);
+
+function clearPad() {
+  const r = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, r.width, r.height);
+  hasInk = false;
+  validate();
+}
+$("#clear").addEventListener("click", clearPad);
+
+$("#typed").addEventListener("click", () => {
+  const name = $("#fullname").value.trim();
+  if (!name) { $("#error").textContent = "Enter your full name first, then choose the typed signature."; $("#fullname").focus(); return; }
+  $("#error").textContent = "";
+  clearPad();
+  const r = canvas.getBoundingClientRect();
+  ctx.font = 'italic 44px Newsreader, Georgia, "Times New Roman", serif';
+  ctx.textBaseline = "middle";
+  ctx.fillText(name, 40, r.height / 2, r.width - 60);
+  hasInk = true;
+  validate();
+});
+
+function exportSignature() {
+  const w = 600;
+  const h = Math.round((w * canvas.height) / canvas.width);
+  const t = document.createElement("canvas");
+  t.width = w;
+  t.height = h;
+  t.getContext("2d").drawImage(canvas, 0, 0, w, h);
+  return t.toDataURL("image/png");
+}
+
+/* ------------------------------------------------------------------
+   Form validation
+------------------------------------------------------------------ */
+const form = $("#form");
+function validate() {
+  const ok = $("#fullname").value.trim().length >= 2 && $("#signdate").value && hasInk && $("#agree").checked;
+  $("#submit").disabled = !ok;
+}
+["input", "change"].forEach((ev) => form.addEventListener(ev, validate));
+validate();
+
+/* ------------------------------------------------------------------
+   PDF
+------------------------------------------------------------------ */
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.onerror = reject;
+    fr.readAsDataURL(blob);
+  });
+}
+
+async function developerSignatureDataUrl() {
+  if (!CONFIG.developer.signatureImage) return null;
+  try {
+    const res = await fetch(CONFIG.developer.signatureImage);
+    if (!res.ok) return null;
+    return await blobToDataUrl(await res.blob());
+  } catch (e) { return null; }
+}
+
+function buildPdf(d) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const M = 56;
+  const W = doc.internal.pageSize.getWidth() - 2 * M;
+  const PH = doc.internal.pageSize.getHeight();
+  let y = M;
+
+  const need = (h) => { if (y + h > PH - M) { doc.addPage(); y = M; } };
+  function text(str, o) {
+    o = o || {};
+    const size = o.size || 10.5;
+    doc.setFont("times", o.bold ? "bold" : "normal");
+    doc.setFontSize(size);
+    const indent = o.indent || 0;
+    const lines = doc.splitTextToSize(strip(str), W - indent);
+    const lh = size * 1.38;
+    for (const l of lines) { need(lh); doc.text(l, M + indent + (o.hang || 0), y); y += lh; }
+    y += o.gap === undefined ? 6 : o.gap;
+  }
+
+  text(AGREEMENT.title, { size: 18, bold: true, gap: 14 });
+
+  for (const b of AGREEMENT.blocks) {
+    if (b.t === "h") { y += 6; need(30); text(b.x, { size: 12.5, bold: true, gap: 4 }); }
+    else if (b.t === "p") text(b.x);
+    else if (b.t === "ol") b.items.forEach((it, i) => text((i + 1) + ".  " + it, { indent: 16, gap: 3 }));
+    else if (b.t === "ul") b.items.forEach((it) => text("\u2022  " + it, { indent: 16, gap: 3 }));
+    else if (b.t === "table") b.rows.forEach((r) => text(r[0] + ": " + r[1], { indent: 16, gap: 3 }));
+    if (b.t === "ol" || b.t === "ul" || b.t === "table") y += 4;
+  }
+
+  // Signature block
+  y += 10; need(220);
+  text("Signatures", { size: 12.5, bold: true, gap: 4 });
+  text("The Parties have signed this Agreement as of the Effective Date.");
+  y += 6;
+  const colW = W / 2 - 12;
+  const top = y;
+  doc.setFont("times", "bold"); doc.setFontSize(10.5);
+  doc.text("Developer", M, top);
+  doc.text("Client", M + colW + 24, top);
+  const sigTop = top + 10, sigH = 60;
+  doc.setDrawColor(23, 33, 43); doc.setLineWidth(0.8);
+  doc.line(M, sigTop + sigH, M + colW, sigTop + sigH);
+  doc.line(M + colW + 24, sigTop + sigH, M + 2 * colW + 24, sigTop + sigH);
+  if (d.devSig) { try { doc.addImage(d.devSig, "PNG", M, sigTop, 150, sigH - 4, undefined, "FAST"); } catch (e) {} }
+  else if (CONFIG.developer.name) { doc.setFont("times", "italic"); doc.setFontSize(20); doc.text(CONFIG.developer.name, M + 4, sigTop + sigH - 8); }
+  try { doc.addImage(d.signature, "PNG", M + colW + 24, sigTop, 150, sigH - 4, undefined, "FAST"); } catch (e) {}
+
+  doc.setFont("times", "normal"); doc.setFontSize(10);
+  let ly = sigTop + sigH + 16;
+  const devLines = ["Signed for Vinova Pte Ltd (UEN 201009399G)"];
+  if (CONFIG.developer.name) devLines.push("Name: " + CONFIG.developer.name);
+  if (CONFIG.developer.title) devLines.push("Title: " + CONFIG.developer.title);
+  devLines.forEach((l, i) => doc.text(l, M, ly + i * 14));
+  const cliLines = ["Full name: " + d.name, "Date signed: " + d.date];
+  cliLines.forEach((l, i) => doc.text(l, M + colW + 24, ly + i * 14));
+  y = ly + 14 * Math.max(devLines.length, cliLines.length) + 20;
+
+  // Evidence block
+  need(90);
+  doc.setDrawColor(196, 205, 216); doc.line(M, y, M + W, y); y += 14;
+  doc.setFont("times", "normal"); doc.setFontSize(8.5);
+  const ev = [
+    "Signed electronically at " + d.signedAt + " (browser time, UTC).",
+    "Agreement version: " + AGREEMENT.version,
+    "SHA-256 of the agreement text: " + d.hash
+  ];
+  ev.forEach((l) => { doc.text(doc.splitTextToSize(l, W), M, y); y += 12; });
+
+  // Page numbers
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    doc.setFont("times", "normal"); doc.setFontSize(8.5);
+    doc.text("Page " + p + " of " + pages, doc.internal.pageSize.getWidth() / 2, PH - 28, { align: "center" });
+  }
+  return doc;
+}
+
+/* ------------------------------------------------------------------
+   Submit
+------------------------------------------------------------------ */
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("#error");
+  err.textContent = "";
+  validate();
+  if ($("#submit").disabled) return;
+  if (!window.jspdf) { err.textContent = "The PDF tool did not load. Refresh the page and try again."; return; }
+  if (CONFIG.apiUrl.indexOf("REPLACE-WITH") !== -1) { err.textContent = "This page is not connected to its server yet."; return; }
+
+  const btn = $("#submit");
+  btn.disabled = true;
+  btn.textContent = "Signing...";
+
+  try {
+    const name = $("#fullname").value.trim();
+    const date = $("#signdate").value;
+    const signature = exportSignature();
+    const hash = await sha256Hex(JSON.stringify(AGREEMENT));
+    const signedAt = new Date().toISOString();
+    const devSig = await developerSignatureDataUrl();
+
+    const doc = buildPdf({ name, date, signature, hash, signedAt, devSig });
+    const pdfBase64 = doc.output("datauristring").split(",")[1];
+    const pdfBlob = doc.output("blob");
+
+    const res = await fetch(CONFIG.apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name, date, signature,
+        agreementHash: hash,
+        agreementVersion: AGREEMENT.version,
+        clientSignedAt: signedAt,
+        pdfBase64
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.id) throw new Error(data.error || "Request failed");
+
+    const safe = name.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-") || "client";
+    const a = $("#download");
+    a.href = URL.createObjectURL(pdfBlob);
+    a.download = "Vinova-NDA-" + safe + ".pdf";
+    $("#done-name").textContent = name;
+    $("#done-ref").textContent = data.id;
+    $("#sheet").hidden = true;
+    $("#done").hidden = false;
+    window.scrollTo(0, 0);
+  } catch (ex) {
+    err.textContent = "We couldn't record your signature. Check your connection and try again. If this keeps happening, contact Vinova.";
+    btn.disabled = false;
+    btn.textContent = "Sign agreement";
+  }
+});
+</script>
+</body>
+</html>
