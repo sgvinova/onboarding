@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>We couldn't find that page | Vinova</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #161616;
+    --text: #2b2b2b;
+    --muted: #6f6f6f;
+    --rule: #e8e8e8;
+    --line: #d6d6d6;
+    --red: #ff1d25;
+    --red-dark: #dd0f17;
+    --red-soft: #f6b4b7;
+    --err: #b3101a;
+    --sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: #fff; color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+  .bar { border-bottom: 1px solid var(--rule); background: #fff; }
+  .bar-in { max-width: 1180px; margin: 0 auto; padding: 0 24px; height: 76px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { font-weight: 700; font-size: 28px; letter-spacing: -0.035em; color: var(--ink); text-decoration: none; line-height: 1; }
+  .brand .o { color: var(--red); }
+  .pill, button.primary {
+    display: inline-block; background: var(--red); color: #fff; font-family: var(--sans); font-weight: 600; font-size: 16px;
+    padding: 12px 26px; border-radius: 999px; text-decoration: none; line-height: 1.4; border: 0; cursor: pointer;
+  }
+  .pill:hover, button.primary:hover:not(:disabled) { background: var(--red-dark); }
+  button.primary { font-size: 18px; padding: 16px 40px; }
+  button.primary:disabled { background: var(--red-soft); cursor: not-allowed; }
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+  .head { padding: 88px 0 48px; border-bottom: 1px solid var(--rule); }
+  h1 { margin: 0 0 24px; color: var(--ink); font-weight: 700; letter-spacing: -0.035em; font-size: clamp(36px, 5.8vw, 76px); line-height: 1.08; overflow-wrap: anywhere; }
+  .lead { margin: 0; max-width: 60ch; font-size: clamp(18px, 2vw, 24px); font-weight: 300; line-height: 1.6; color: var(--muted); }
+  .lead a { color: var(--ink); font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+  .lead a:hover { color: var(--red-dark); }
+
+  form { max-width: 840px; padding: 64px 0 24px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  input[type="text"], input[type="email"], textarea {
+    display: block; width: 100%; margin: 0 0 20px; padding: 18px 22px; font: inherit; font-size: 16px; font-weight: 300; color: var(--ink);
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  }
+  textarea { min-height: 240px; resize: vertical; }
+  ::placeholder { color: var(--muted); opacity: 1; }
+  .trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .error { margin: 14px 0 0; min-height: 1.4em; font-size: 14px; color: var(--err); }
+  .alt { margin: 0 0 120px; font-weight: 300; color: var(--muted); }
+  .alt a { color: var(--red); text-decoration: none; }
+  .alt a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .thanks { max-width: 840px; padding: 64px 0 120px; }
+  .thanks h2 { margin: 0 0 12px; font-size: clamp(26px, 3.4vw, 40px); font-weight: 700; letter-spacing: -0.03em; color: var(--ink); line-height: 1.15; }
+  .thanks p { margin: 0; font-weight: 300; font-size: 18px; }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 720px) {
+    .bar-in { height: 64px; }
+    .brand { font-size: 24px; }
+    .pill { padding: 10px 18px; font-size: 14px; }
+    .head { padding: 48px 0 32px; }
+    form { padding-top: 40px; }
+    button.primary { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="https://sgvinova.com" aria-label="Vinova home">Vin<span class="o">o</span>va</a>
+    <a class="pill" href="https://sgvinova.com">sgvinova.com <span aria-hidden="true">&rarr;</span></a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="head">
+    <h1>We couldn&rsquo;t find that page</h1>
+    <p class="lead">The page you requested does not exist. To sign your NDA, <a href="https://onboarding.sgvinova.com/">go to the signing page</a>. If you are trying to find something else, leave us a message instead.</p>
+  </section>
+
+  <form id="contact" novalidate>
+    <label class="sr" for="c-name">Name</label>
+    <input id="c-name" type="text" name="name" placeholder="Name" autocomplete="name" maxlength="120" required>
+    <label class="sr" for="c-email">Email</label>
+    <input id="c-email" type="email" name="email" placeholder="Email" autocomplete="email" maxlength="200" required>
+    <label class="sr" for="c-company">Company</label>
+    <input id="c-company" type="text" name="company" placeholder="Company" autocomplete="organization" maxlength="200">
+    <label class="sr" for="c-message">Message</label>
+    <textarea id="c-message" name="message" placeholder="What were you looking for, or tell us about your project" maxlength="4000" required></textarea>
+    <div class="trap" aria-hidden="true"><label>Leave this empty <input type="text" name="website" id="c-website" tabindex="-1" autocomplete="off"></label></div>
+    <button type="submit" class="primary" id="c-send">Send message</button>
+    <p class="error" id="c-error" role="alert" aria-live="assertive"></p>
+  </form>
+
+  <section class="thanks" id="thanks" hidden>
+    <h2>Thank you, we&rsquo;ve got your message</h2>
+    <p>We&rsquo;ll get back to you at the email address you gave us.</p>
+  </section>
+
+  <p class="alt" id="alt">Or email us at <a href="mailto:hello@sgvinova.com">hello@sgvinova.com</a>.</p>
+</main>
+
+<script>
+/* ------------------------------------------------------------------
+   CONFIGURE BEFORE PUBLISHING
+   Your Worker address followed by /contact, for example:
+   https://vinova-nda-signing.vinova.workers.dev/contact
+------------------------------------------------------------------ */
+const CONTACT_URL = "https://REPLACE-WITH-YOUR-WORKER-URL/contact";
+
+const $ = (s) => document.querySelector(s);
+const form = $("#contact");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("#c-error");
+  err.textContent = "";
+
+  const name = $("#c-name").value.trim();
+  const email = $("#c-email").value.trim();
+  const company = $("#c-company").value.trim();
+  const message = $("#c-message").value.trim();
+  const website = $("#c-website").value;
+
+  if (!name) { err.textContent = "Please enter your name."; $("#c-name").focus(); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "Please enter a valid email address."; $("#c-email").focus(); return; }
+  if (!message) { err.textContent = "Please write a short message."; $("#c-message").focus(); return; }
+  if (CONTACT_URL.indexOf("REPLACE-WITH") !== -1) { err.textContent = "This form is not connected yet. Please email hello@sgvinova.com."; return; }
+
+  const btn = $("#c-send");
+  btn.disabled = true;
+  btn.textContent = "Sending...";
+  try {
+    const res = await fetch(CONTACT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, company, message, website })
+    });
+    if (!res.ok) throw new Error("Request failed");
+    form.hidden = true;
+    $("#thanks").hidden = false;
+    $("#alt").hidden = true;
+  } catch (ex) {
+    err.textContent = "We couldn't send your message. Please email us at hello@sgvinova.com instead.";
+    btn.disabled = false;
+    btn.textContent = "Send message";
+  }
+});
+</script>
+</body>
+</html>
